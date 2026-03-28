@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WickerMan Card - Pixel Cover</title>
+    <title>WickerMan Card - Mobile Pro</title>
     
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     
@@ -12,21 +12,24 @@
 
     <style>
         canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
+        
         body {
             background-color: #050a15;
             margin: 0;
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             font-family: 'VT323', monospace;
             text-rendering: optimizeSpeed; 
-            overflow: hidden;
             position: relative;
+            padding: 15px; /* Чтобы не липло к краям экрана */
+            box-sizing: border-box;
+            overflow-x: hidden;
         }
 
         #particles-js {
-            position: absolute;
+            position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             z-index: 1;
         }
@@ -39,15 +42,19 @@
             border-radius: 12px;
             display: flex;
             flex-direction: column; 
-            padding: 30px;
+            padding: 25px;
             gap: 20px;
             box-shadow: 0 0 70px rgba(0, 0, 0, 0.9);
-            max-width: 850px;
+            width: 100%;
+            max-width: 850px; /* Макс ширина для ПК */
+            box-sizing: border-box;
         }
 
         .main-content {
             display: flex;
-            gap: 40px;
+            gap: 30px;
+            flex-wrap: wrap; /* Магия адаптивности здесь */
+            justify-content: space-between;
         }
 
         .info {
@@ -58,6 +65,8 @@
             font-size: 24px;
             line-height: 1.4;
             white-space: pre-line;
+            flex: 1;
+            min-width: 280px;
         }
 
         .nickname-wrapper { display: flex; align-items: center; margin-bottom: 10px; }
@@ -68,7 +77,7 @@
         .nickname-link:hover .nickname { color: #ffffff; }
         .nickname-link:hover .tg-icon { fill: #ffffff; transform: scale(1.1); }
 
-        /* --- ПЛЕЕР С ПИКСЕЛЬНОЙ ОБЛОЖКОЙ --- */
+        /* ПЛЕЕР */
         .music-player {
             background: rgba(0, 0, 0, 0.4);
             border: 2px solid #1e3a5f;
@@ -77,6 +86,7 @@
             display: flex;
             align-items: center;
             gap: 20px;
+            flex-wrap: wrap; /* Чтоб кнопки не вылазили на мелких экранах */
         }
 
         .track-cover {
@@ -84,16 +94,9 @@
             height: 60px;
             border-radius: 4px;
             border: 2px solid #1e3a5f;
-            
-            /* --- ГРУЗИМ ТВОЮ КАРТИНКУ --- */
             background: url('cover.jpg') no-repeat center center;
             background-size: cover;
-            
-            /* ДЕЛАЕМ ЕЁ ПИКСЕЛЬНОЙ */
             image-rendering: pixelated;
-            image-rendering: crisp-edges;
-            /* --------------------------- */
-            
             flex-shrink: 0;
         }
 
@@ -102,6 +105,7 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
+            min-width: 200px;
         }
 
         .track-info {
@@ -109,6 +113,7 @@
             color: #00d4ff;
             display: flex;
             justify-content: space-between;
+            gap: 10px;
         }
 
         .progress-container {
@@ -137,7 +142,46 @@
 
         .btn-play:hover { background: #00d4ff; color: #050a15; }
 
-        #skin_container { width: 260px; height: 380px; background: rgba(0, 0, 0, 0.3); border-radius: 8px; cursor: grab; border: 2px solid #1e3a5f; }
+        #skin_container { 
+            width: 260px; 
+            height: 380px; 
+            background: rgba(0, 0, 0, 0.3); 
+            border-radius: 8px; 
+            cursor: grab; 
+            border: 2px solid #1e3a5f;
+            margin: 0 auto; /* Центрируем скин на мобилках */
+        }
+
+        /* АДАПТАЦИЯ ПОД ТЕЛЕФОНЫ */
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column-reverse; /* Скин сверху, текст снизу как на скрине */
+                align-items: center;
+                gap: 20px;
+            }
+            .info {
+                text-align: center;
+                min-width: 100%;
+            }
+            .nickname-wrapper {
+                justify-content: center;
+            }
+            .nickname {
+                font-size: 42px;
+            }
+            .player-card {
+                padding: 15px;
+            }
+            .track-info {
+                font-size: 14px;
+                flex-direction: column;
+                align-items: center;
+            }
+            #skin_container {
+                width: 200px;
+                height: 300px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -173,7 +217,7 @@ say "goodbye" meet tomorrow in rainbow bridge
             <div class="progress-container" id="progress-cont">
                 <div class="progress-bar" id="progress-fill"></div>
             </div>
-            <div style="display: flex; gap: 10px; align-items: center;">
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: center;">
                 <button class="btn-play" id="play-btn">PLAY</button>
                 <span style="font-size: 14px; color: #5d7a9b;">пизда лупасит</span>
             </div>
@@ -216,21 +260,20 @@ say "goodbye" meet tomorrow in rainbow bridge
         // Частицы
         particlesJS("particles-js", {
             "particles": {
-                "number": { "value": 110 },
+                "number": { "value": 80 }, /* Чуть меньше для мобил, чтоб не тормозило */
                 "color": { "value": "#00d4ff" },
                 "size": { "value": 1.2 },
                 "line_linked": { "enable": true, "distance": 130, "color": "#00d4ff", "opacity": 0.15, "width": 0.5 },
                 "move": { "enable": true, "speed": 1.5 }
-            },
-            "interactivity": { "events": { "onhover": { "enable": true, "mode": "repulse" } } }
+            }
         });
 
         // Скин
         const container = document.getElementById("skin_container");
         const skinViewer = new skinview3d.SkinViewer({
             canvas: document.createElement("canvas"),
-            width: 260,
-            height: 380,
+            width: container.clientWidth,
+            height: container.clientHeight,
         });
         container.appendChild(skinViewer.canvas);
         skinViewer.loadSkin("skin.png").catch(() => skinViewer.loadSkin("https://mineskin.eu/skin/steve"));
@@ -239,8 +282,6 @@ say "goodbye" meet tomorrow in rainbow bridge
         skinViewer.animations.add(skinview3d.RotatingAnimation).speed = 0.5;
         let walk = skinViewer.animations.add(skinview3d.WalkingAnimation);
         walk.speed = 0.6;
-        container.onmouseenter = () => walk.speed = 1.5;
-        container.onmouseleave = () => walk.speed = 0.6;
     };
 </script>
 
